@@ -1,6 +1,6 @@
 # obsidian-to-anytype
-This script help to migrate from Obsidian to AnyType.
-Script creates .md links from wiki links and converts folders to indexes
+This script help to migrate from Obsidian to Anytype.  
+This script creates .md links [name](path.md) from wiki-links [[name]] and converts folders into .md indexes. Markdown links are easily processed by Anytype.  
 
 ### How to use
 - Create backup
