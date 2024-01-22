@@ -1,8 +1,6 @@
 import os
 import re
 
-
-
 base_path = '.'
 newfiles_folder = 'newnoteflow'
 
@@ -106,7 +104,7 @@ if confirm_execution("Replace wiki-links with md-links"):
                 replace_wiki_links(os.path.join(root, file))
     print("Wiki-links to md-links replacement completed.")
 
-if confirm_execution("Update links and create directory indexes"):
+if confirm_execution("Make links relative and create directory indexes"):
     for root, dirs, files in os.walk(base_path):
         for dir in dirs:
             create_directory_index(os.path.join(root, dir))
@@ -115,7 +113,7 @@ if confirm_execution("Update links and create directory indexes"):
                 update_links_and_create_directory_index(os.path.join(root, file), base_path)
     print("Links updating and directory indexes creation completed.")
 
-if confirm_execution("Update Markdown links"):
+if confirm_execution("Update Markdown links: replace spaces to %20"):
     for root, dirs, files in os.walk(base_path):
         for file in files:
             if file.endswith('.md'):
