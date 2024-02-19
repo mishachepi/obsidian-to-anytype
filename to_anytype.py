@@ -12,8 +12,20 @@ def replace_wiki_links(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             contents = file.read()
+
+        def replace_function(match):
+            link_content = match.group(1)
+            # Проверка на расширения файлов изображений
+            if link_content.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg', '.md')):
+                # Если это изображение, возвращаем оригинальный формат без добавления .md
+                return f"[{link_content}]({link_content})"
+            else:
+                # Для всех остальных случаев добавляем .md
+                return f"[{link_content}]({link_content}.md)"
+
         pattern = r'\[\[(.*?)\]\]'
-        updated_contents = re.sub(pattern, lambda m: f"[{m.group(1)}]({m.group(1)}.md)", contents)
+        updated_contents = re.sub(pattern, replace_function, contents)
+
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(updated_contents)
     except Exception as e:
@@ -33,6 +45,7 @@ def create_if_not_exists(file_path):
                 file.write('')
     except Exception as e:
         print(f"Error creating file {file_path}: {e}")
+
 
 def update_links_and_create_directory_index(file_path, base_path):
     try:
@@ -96,6 +109,35 @@ def update_md_links(file_path):
     except Exception as e:
         print(f"Error updating Markdown links in file {file_path}: {e}")
 
+
+def preprocess_md_links(file_path):
+    """Preprocess Markdown links: replace %20 with spaces and remove relative paths."""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            contents = file.read()
+
+        # Replace %20 with spaces
+        contents = re.sub(r'%20', ' ', contents)
+
+        # Remove relative paths, keeping only the file name
+        def remove_relative_path(match):
+            name, path = match.groups()
+            filename = os.path.basename(path)
+            return f"[{name}]({filename})"
+
+        contents = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', remove_relative_path, contents)
+
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(contents)
+    except Exception as e:
+        print(f"Error preprocessing Markdown links in file {file_path}: {e}")
+
+if confirm_execution("Preprocess Markdown links"):
+    for root, dirs, files in os.walk(base_path):
+        for file in files:
+            if file.endswith('.md'):
+                preprocess_md_links(os.path.join(root, file))
+    print("Preprocessing of Markdown links completed.")
 
 if confirm_execution("Replace wiki-links with md-links"):
     for root, dirs, files in os.walk(base_path):
