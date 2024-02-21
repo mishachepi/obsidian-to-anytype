@@ -15,12 +15,9 @@ def replace_wiki_links(file_path):
 
         def replace_function(match):
             link_content = match.group(1)
-            # Проверка на расширения файлов изображений
             if link_content.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg', '.md')):
-                # Если это изображение, возвращаем оригинальный формат без добавления .md
                 return f"[{link_content}]({link_content})"
             else:
-                # Для всех остальных случаев добавляем .md
                 return f"[{link_content}]({link_content}.md)"
 
         pattern = r'\[\[(.*?)\]\]'
@@ -46,31 +43,36 @@ def create_if_not_exists(file_path):
     except Exception as e:
         print(f"Error creating file {file_path}: {e}")
 
-
 def update_links_and_create_directory_index(file_path, base_path):
     try:
+        print(f"Processing file: {file_path}")
         with open(file_path, 'r', encoding='utf-8') as file:
             contents = file.read()
 
         def replace_link(match):
             is_image, name, link = match.groups()
 
-            # Skip external links
             if link.startswith("http://") or link.startswith("https://"):
+                # Log external links
+                print(f"External link found, skipping: {link}")
                 return match.group(0)
 
+            print(f"Processing link: {link}")
             found_path = find_file(link, base_path)
             if found_path:
-                # Use relative path
+                print(f"File found for link: {link}")
                 relative_path = os.path.relpath(found_path, start=os.path.dirname(file_path))
             else:
-                # If file not found, create it in newnoteflow folder (for .md files only)
+                print(f"File not found for link: {link}")
                 if is_image == '':
+                    # Log creation of new markdown files
                     newfiles_path = os.path.join(base_path, newfiles_folder, link)
+                    print(f"Creating new markdown file: {newfiles_path}")
                     create_if_not_exists(newfiles_path)
                     relative_path = os.path.relpath(newfiles_path, start=os.path.dirname(file_path))
                 else:
-                    # For images, keep original link if file not found
+                    # Log keeping original link for images
+                    print(f"Keeping original link for image: {link}")
                     relative_path = link
             return f"{is_image}[{name}]({relative_path})"
 
@@ -79,6 +81,7 @@ def update_links_and_create_directory_index(file_path, base_path):
 
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(updated_contents)
+        print(f"Finished processing file: {file_path}")
     except Exception as e:
         print(f"Error updating links in file {file_path}: {e}")
 
