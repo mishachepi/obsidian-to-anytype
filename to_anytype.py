@@ -37,9 +37,12 @@ def find_file(name, search_path):
 def create_if_not_exists(file_path):
     try:
         if not os.path.exists(file_path):
+            print(f"Creating new markdown file: {file_path}")
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, 'w', encoding='utf-8') as file:
                 file.write('')
+        else:
+            print("file found, udpdate link")
     except Exception as e:
         print(f"Error creating file {file_path}: {e}")
 
@@ -67,7 +70,6 @@ def update_links_and_create_directory_index(file_path, base_path):
                 if is_image == '':
                     # Log creation of new markdown files
                     newfiles_path = os.path.join(base_path, newfiles_folder, link)
-                    print(f"Creating new markdown file: {newfiles_path}")
                     create_if_not_exists(newfiles_path)
                     relative_path = os.path.relpath(newfiles_path, start=os.path.dirname(file_path))
                 else:
