@@ -15,17 +15,20 @@ newfiles_folder = 'newnoteflow'
 
 # Part1
 def preprocess_md_links(file_path):
-    """Preprocess Markdown links: replace %20 with spaces and remove relative paths."""
+    """Preprocess Markdown links: replace %20 with spaces and change relative paths to absolute."""
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             contents = file.read()
 
         # Replace %20 with spaces
         contents = re.sub(r'%20', ' ', contents)
-
+        # fd.write("PART1: All %20 replaced to ' '")
         # Remove relative paths, keeping only the file name
         def remove_relative_path(match):
             name, path = match.groups()
+            # fd.write(" ")
+            if path.startswith("http:") or path.startswith("https:") or path.startswith("onenote:"):
+                return path
             filename = os.path.basename(path)
             return f"[{name}]({filename})"
 
@@ -147,7 +150,12 @@ def confirm_execution(part):
     response = input(f"Do you want to execute the script part '{part}'? (yes/no): ").lower()
     return response in ["yes"]
 
+
 ### Main
+
+# fd = open("log.txt", "a")
+# fd.write("----------")
+
 if confirm_execution("1. Preprocessing .md links. Changeing .md links to one format"):
     for root, dirs, files in os.walk(base_path):
         for file in files:
@@ -177,3 +185,5 @@ if confirm_execution("4. Updating Markdown links: replace spaces to %20"):
             if file.endswith('.md'):
                 update_md_links(os.path.join(root, file))
     print("Markdown links update completed.")
+
+# fd.close()
