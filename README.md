@@ -6,6 +6,7 @@ This output format suit for AnyType.
 - Part2: changing [[wiki-links]] to [markdown-links](markdown-links.md)
 - Part3: createing relative path for all links and creating new if not exist. And creating Folders links (Folders links contain links to all included files)
 - Part4: just changing " " to "%20" for Markdown standart
+- Part5: remove dashes from metategs. Metategs to text.
 
 ### How to use
 - Create backup
