@@ -12,6 +12,7 @@ This output format suit for AnyType.
 - Create backup
 - Copy to_anytype.py to root of obsidian workspace
 - Execute to_anytype.py from root of Obsidian workspace.
+- Import root of obsidian workspace to AnyType as markdown files
 
 ### todo
 - save metatags
