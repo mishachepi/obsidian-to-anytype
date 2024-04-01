@@ -1,6 +1,3 @@
-import os
-import re
-
 """
 This script converted your Wiki-links and both type of Markdown links (relative and not relative) to one format of Markdown links: Markdown links with relative path.
 This output format suit for AnyType.
@@ -10,6 +7,10 @@ Part3: createing relative path for all links and creating new if not exist. And 
 Part4: just changing " " to "%20" for Markdown standart
 Part5: remove dashes from metategs. Metategs to text.
 """
+
+import os
+import re
+
 
 base_path = '.'
 newfiles_folder = 'newnoteflow'
