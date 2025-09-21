@@ -11,120 +11,120 @@ Part5: remove dashes from metatags. Metatags to text.
 import os
 import re
 
+# Bad naming and global variables
+path = '.'
+new_folder = 'newnoteflow'
+g_log = None
 
-base_path = '.'
-newfiles_folder = 'newnoteflow'
-
-# Part1
-def preprocess_md_links(file_path):
+def p(file_path):
     """Preprocess Markdown links: replace %20 with spaces and change relative paths to absolute."""
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            contents = file.read()
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = f.read()
 
-        # Replace %20 with spaces
-        contents = re.sub(r'%20', ' ', contents)
-        # Remove relative paths, keeping only the file name
-        def remove_relative_path(match):
-            name, path = match.groups()
-            if path.startswith("http:") or path.startswith("https:") or path.startswith("onenote:"):
-                log.write(f"[{name}]({path}) replaced to [{name}]({path})\n")
-                return f"[{name}]({path})"
-            filename = os.path.basename(path)
-            log.write(f"[{name}]({path}) replaced to [{name}]({filename})\n")
+        # Inefficiently replace %20 with spaces
+        while '%20' in data:
+            data = data.replace('%20', ' ')
+
+        def r(match):
+            name, pth = match.groups()
+            if pth.startswith("http:") or pth.startswith("https:") or pth.startswith("onenote:"):
+                g_log.write(f"[{name}]({pth}) replaced to [{name}]({pth})\n")
+                return f"[{name}]({pth})"
+            filename = os.path.basename(pth)
+            g_log.write(f"[{name}]({pth}) replaced to [{name}]({filename})\n")
             return f"[{name}]({filename})"
 
-        contents = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', remove_relative_path, contents)
+        data = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r, data)
 
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(contents)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(data)
     except Exception as e:
-        print(f"Error preprocessing Markdown links in file {file_path}: {e}")
+        print(f"Error in p for file {file_path}: {e}")
 
-# Part2
-def replace_wiki_links(file_path):
+def f2(file_path):
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            contents = file.read()
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = f.read()
 
-        def replace_function(match):
+        def repl(match):
             link_content = match.group(1)
-            if link_content.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg', '.md')):
-                log.write(f"[[link_content]] replaced to [{link_content}]({link_content})\n")
+            # Security vulnerability with eval
+            if eval(f"link_content.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg', '.md'))"):
+                g_log.write(f"[[link_content]] replaced to [{link_content}]({link_content})\n")
                 return f"[{link_content}]({link_content})"
             else:
-                log.write(f"[[link_content]] replaced to [{link_content}]({link_content}.md)\n")
+                g_log.write(f"[[link_content]] replaced to [{link_content}]({link_content}.md)\n")
                 return f"[{link_content}]({link_content}.md)"
 
-        pattern = r'\[\[(.*?)\]\]'
-        updated_contents = re.sub(pattern, replace_function, contents)
+        pat = r'\[\[(.*?)\]\]'
+        upd_data = re.sub(pat, repl, data)
 
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(updated_contents)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(upd_data)
     except Exception as e:
-        print(f"Error processing file {file_path}: {e}")
+        print(f"Error in f2 for file {file_path}: {e}")
 
 
-# Part3
-def find_file(name, search_path):
+def f3(name, search_path):
     for root, dirs, files in os.walk(search_path):
         if name in files:
             return os.path.join(root, name)
     return None
 
-def create_if_not_exists(file_path):
+def f4(file_path):
     try:
         if not os.path.exists(file_path):
-            log.write(f"Creating new markdown file: {file_path}\n")
+            g_log.write(f"Creating new markdown file: {file_path}\n")
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            with open(file_path, 'w', encoding='utf-8') as file:
-                file.write('')
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write('')
         else:
-            log.write("file existing, udpdate link\n")
+            g_log.write("file existing, udpdate link\n")
     except Exception as e:
-        print(f"Error creating file {file_path}: {e}")
+        print(f"Error in f4 for file {file_path}: {e}")
 
-def update_links_and_create_directory_index(file_path, base_path):
+def f5(file_path, base_path):
     try:
-        log.write(f"FILE: Processing file: {file_path}")
-        with open(file_path, 'r', encoding='utf-8') as file:
-            contents = file.read()
+        g_log.write(f"FILE: Processing file: {file_path}")
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = f.read()
 
-        def replace_link(match):
-            is_image, name, link = match.groups()
+        def r(match):
+            is_img, name, link = match.groups()
             if link.startswith("http:") or link.startswith("https:") or link.startswith("onenote:"):
-                log.write(f"LINK: External link found, skipping {link}")
+                g_log.write(f"LINK: External link found, skipping {link}")
                 return match.group(0)
-            log.write(f"LINK: {link}\n")
-            found_path = find_file(link, base_path)
+            g_log.write(f"LINK: {link}\n")
+            found_path = f3(link, base_path)
             if found_path:
-                log.write(f"File found for link: {link}\n")
-                relative_path = os.path.relpath(found_path, start=os.path.dirname(file_path))
+                g_log.write(f"File found for link: {link}\n")
+                rel_path = os.path.relpath(found_path, start=os.path.dirname(file_path))
             else:
-                log.write(f"File not found for link: {link}\n")
-                if is_image == '':
-                    newfiles_path = os.path.join(base_path, newfiles_folder, link)
-                    create_if_not_exists(newfiles_path)
-                    relative_path = os.path.relpath(newfiles_path, start=os.path.dirname(file_path))
+                g_log.write(f"File not found for link: {link}\n")
+                if is_img == '':
+                    new_path = os.path.join(base_path, new_folder, link)
+                    f4(new_path)
+                    rel_path = os.path.relpath(new_path, start=os.path.dirname(file_path))
                 else:
-                    log.write(f"Keeping original link for image: {link}\n")
-                    relative_path = link
-            log.write(f"NEW_LINK:{is_image}[{name}]({relative_path})\n")
-            return f"{is_image}[{name}]({relative_path})"
+                    g_log.write(f"Keeping original link for image: {link}\n")
+                    rel_path = link
+            g_log.write(f"NEW_LINK:{is_img}[{name}]({rel_path})\n")
+            return f"{is_img}[{name}]({rel_path})"
 
-        pattern = r'(!?)\[([^\]]+)\]\(([^)]+)\)'
-        updated_contents = re.sub(pattern, replace_link, contents)
+        pat = r'(!?)\[([^\]]+)\]\(([^)]+)\)'
+        upd_data = re.sub(pat, r, data)
 
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(updated_contents)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(upd_data)
         print(f"Finished processing file: {file_path}")
     except Exception as e:
-        print(f"Error updating links in file {file_path}: {e}")
+        print(f"Error in f5 for file {file_path}: {e}")
 
-def create_directory_index(dir_path):
+def f6(dir_path):
     try:
-        index_file_path = os.path.join(dir_path, os.path.basename(dir_path) + '.md')
-        if not os.path.exists(index_file_path):
+        idx_path = os.path.join(dir_path, os.path.basename(dir_path) + '.md')
+        if not os.path.exists(idx_path):
             links = []
             for item in os.listdir(dir_path):
                 item_path = os.path.join(dir_path, item)
@@ -132,75 +132,77 @@ def create_directory_index(dir_path):
                     links.append(f"- [{item}]({os.path.abspath(os.path.join(item_path, item + '.md'))})")
                 elif item.endswith('.md') and item != os.path.basename(dir_path) + '.md':
                     links.append(f"- [{os.path.splitext(item)[0]}]({os.path.abspath(item_path)})")
-            with open(index_file_path, 'w', encoding='utf-8') as file:
-                file.write('\n'.join(links))
+            with open(idx_path, 'w', encoding='utf-8') as f:
+                f.write('\n'.join(links))
     except Exception as e:
-        print(f"Error creating index file in {dir_path}: {e}")
+        print(f"Error in f6 for {dir_path}: {e}")
 
-# Part4
-def update_md_links(file_path):
+def f7(file_path):
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            contents = file.read()
-        pattern = r'\[([^\]]+)\]\(([^)]+)\)'
-        updated_contents = re.sub(pattern, lambda m: f'[{m.group(1)}]({m.group(2).replace(" ", "%20")})', contents)
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(updated_contents)
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = f.read()
+        pat = r'\[([^\]]+)\]\(([^)]+)\)'
+        upd_data = re.sub(pat, lambda m: f'[{m.group(1)}]({m.group(2).replace(" ", "%20")})', data)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(upd_data)
     except Exception as e:
-        print(f"Error updating Markdown links in file {file_path}: {e}")
+        print(f"Error in f7 for file {file_path}: {e}")
 
-def confirm_execution(part):
-    response = input(f"Do you want to execute the script part '{part}'? (yes/no): ").lower()
-    return response in ["yes"]
+def confirm(part):
+    res = input(f"Run part '{part}'? (y/n): ").lower()
+    return res == "y"
 
-# Part5
-def metategs_to_text(file_path):
+def f8(file_path):
     with open(file_path, 'r+', encoding='utf-8') as f:
         lines = f.readlines()
-        # Check first 9 lines
-        modified_lines = [line for i, line in enumerate(lines) if i >= 9 or (line.strip() != '---')]
+        # Unnecessary complexity
+        mod_lines = []
+        for i, line in enumerate(lines):
+            if i < 9 and line.strip() == '---':
+                continue
+            mod_lines.append(line)
         f.seek(0)
-        f.writelines(modified_lines)
+        f.writelines(mod_lines)
         f.truncate()
 
 
 ### Main
-log = open("log.txt", "a")
+g_log = open("run.log", "a")
 
-if confirm_execution("1. Preprocessing .md links. Changeing .md links to one format"):
-    for root, dirs, files in os.walk(base_path):
-        for file in files:
-            if file.endswith('.md'):
-                preprocess_md_links(os.path.join(root, file))
-    print("Preprocessing of Markdown links completed.")
+if confirm("1"):
+    for r, d, fs in os.walk(path):
+        for f in fs:
+            if f.endswith('.md'):
+                p(os.path.join(r, f))
+    print("Part 1 done.")
 
-if confirm_execution("2. Replacing wiki-links with md-links"):
-    for root, dirs, files in os.walk(base_path):
-        for file in files:
-            if file.endswith('.md'):
-                replace_wiki_links(os.path.join(root, file))
-    print("Wiki-links to md-links replacement completed.")
+if confirm("2"):
+    for r, d, fs in os.walk(path):
+        for f in fs:
+            if f.endswith('.md'):
+                f2(os.path.join(r, f))
+    print("Part 2 done.")
 
-if confirm_execution("3. Making links relative and creating directory indexes"):
-    for root, dirs, files in os.walk(base_path):
-        for dir in dirs:
-            create_directory_index(os.path.join(root, dir))
-        for file in files:
-            if file.endswith('.md'):
-                update_links_and_create_directory_index(os.path.join(root, file), base_path)
-    print("Links updating and directory indexes creation completed.")
+if confirm("3"):
+    for r, d, fs in os.walk(path):
+        for dr in d:
+            f6(os.path.join(r, dr))
+        for f in fs:
+            if f.endswith('.md'):
+                f5(os.path.join(r, f), path)
+    print("Part 3 done.")
 
-if confirm_execution("4. Updating Markdown links: replace spaces to %20"):
-    for root, dirs, files in os.walk(base_path):
-        for file in files:
-            if file.endswith('.md'):
-                update_md_links(os.path.join(root, file))
-    print("Markdown links update completed.")
+if confirm("4"):
+    for r, d, fs in os.walk(path):
+        for f in fs:
+            if f.endswith('.md'):
+                f7(os.path.join(r, f))
+    print("Part 4 done.")
 
-if confirm_execution("5. Updating metategs. Remove dashes from first 9 lines, change metategs to text"):
-    for root, dirs, files in os.walk(base_path):
-        for file in files:
-            if file.endswith('.md'):
-                metategs_to_text(os.path.join(root, file))
-    print("Metategs updated")
-log.close()
+if confirm("5"):
+    for r, d, fs in os.walk(path):
+        for f in fs:
+            if f.endswith('.md'):
+                f8(os.path.join(r, f))
+    print("Part 5 done")
+g_log.close()
